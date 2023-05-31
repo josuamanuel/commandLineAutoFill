@@ -3,10 +3,14 @@
 import { spawn} from 'child_process'
 import { stdin as input, stdout as output } from 'node:process';
 
+process.env
 // Spawn the shell command.
 const child = spawn(
   '/Library/Frameworks/Python.framework/Versions/3.9/bin/adfs-aws-login',
-   []
+   [],
+   {
+    env: {ADFS_DEFAULT_PASSWORD: process.env.CONFIDENTIAL, ...process.env}
+   }
 )
 
 let index = 0
@@ -16,7 +20,6 @@ child.stdout.on('data', (data) => {
 
   if(index === 0 ) {
     child.stdin.write('\n')
-    //    child.stdin.write('Corcordoba11\n')
   }
 
   if(index === 1) {
@@ -34,11 +37,20 @@ child.stdout.on('data', (data) => {
 child.stderr.on('data', (data) => {
   console.error(`Received error: ${data}`)
 })
+// Handle error at spawning
+child.on('error', (code) => {
+  console.log('Error spawning ', code);
+})
 
 // Handle end of child
 child.stdout.on('end', function () {
   console.log('child stream ended...');
 });
+
+// Handle the exit
+child.on('exit', (code) => {
+  console.log('child exit with code: ', code);
+})
 
 // Handle the completion of the child process.
 child.on('close', (code) => {
@@ -46,8 +58,6 @@ child.on('close', (code) => {
   child.stdin.end()
   process.exit(code)
 })
-
-
 
 function findAndExtractSeclection(value, textOptions)
 {
