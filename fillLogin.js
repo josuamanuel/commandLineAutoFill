@@ -27,11 +27,6 @@ child.stdout.on('data', (data) => {
   index++
 })
 
-function writeToSpawnAndConsole(value)
-{
-  child.stdin.write(value)
-  console.log(value)
-}
 
 // Read errors from the child process's stderr.
 child.stderr.on('data', (data) => {
