@@ -1,0 +1,46 @@
+#! /usr/bin/expect -f
+
+set passFile [open "~/confidential.txt"]
+set pass [read $passFile]
+
+set entorno [lindex $argv 0]
+
+set pattern {Please.*\[ (\d+) \].*$search_string.*election:}
+
+spawn adfs-aws-login
+expect "Username "
+send "\r"
+expect "Password:"
+send "$pass\r"
+
+
+if { $entorno == "dev" } {
+  expect -re {Please.*\[ (\d+) \].*productinfo-kubernetes-limited-dev.*election:}
+}
+
+if { $entorno == "pre" } {
+  expect -re {Please.*\[ (\d+) \].*productinfo-kubernetes-limited-preprod.*election:}
+}
+
+if { $entorno == "pro" } {
+  expect -re {Please.*\[ (\d+) \].*omni-k8s-readonly-prod.*election:}
+}
+
+if { $entorno == "preVault" } {
+  expect -re {Please.*\[ (\d+) \].*sirius-vault-secret-manager-productinfo-preprod.*election:}
+}
+
+if { $entorno == "code" } {
+  expect -re {Please.*\[ (\d+) \].*sirius-codeartifact-read-shared.*election:}
+}
+
+set optionNumber $expect_out(1,string)
+send "$optionNumber\r"
+puts "$optionNumber\r"
+
+
+spawn zsh
+send ". ~/diaproxy.sh\r"
+send "awsj $entorno\r"
+
+interact

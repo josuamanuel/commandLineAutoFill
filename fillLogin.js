@@ -21,7 +21,7 @@ child.stdout.on('data', (data) => {
   console.log(`${dataStr}${
     dataStr === 'password: '
       ? ''
-      : toWrite
+      : (toWrite ?? '')  
     }`
   )
   index++
